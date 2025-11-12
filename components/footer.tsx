@@ -14,7 +14,7 @@ export function Footer() {
               />
             </div>
             <p className="text-neutral-400 text-sm leading-relaxed">
-              Conectando Perú con tecnología de punta y servicio profesional desde 2014.
+              Conectando Perú con tecnolog��a de punta y servicio profesional desde 2014.
             </p>
           </div>
 
