@@ -140,11 +140,11 @@ const plansData: PlanCategory[] = [
   },
   {
     id: "iptv",
-    label: "IPTV",
+    label: "FASTNET+",
     description: "Televisión por internet con calidad 4K",
     plans: [
       {
-        name: "Plan IPTV Básico",
+        name: "Plan FASTNET+ Básico",
         speed: "HD Quality",
         speedValue: 70,
         price: "S/ 10",
@@ -153,7 +153,7 @@ const plansData: PlanCategory[] = [
         icon: <Smartphone className="w-5 h-5" />,
       },
       {
-        name: "Plan IPTV Premium",
+        name: "Plan FASTNET+ Premium",
         speed: "Calidad 4K",
         speedValue: 100,
         price: "S/ 15",

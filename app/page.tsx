@@ -168,7 +168,7 @@ export default function Home() {
               </Card>
             </ScrollAnimation>
 
-            <ScrollAnimation direction="right" delay={300}>
+            {/* <ScrollAnimation direction="right" delay={300}>
               <Card className="border border-gray-200 hover:border-red-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
                 <CardContent className="p-8">
                   <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
@@ -194,7 +194,7 @@ export default function Home() {
                   </ul>
                 </CardContent>
               </Card>
-            </ScrollAnimation>
+            </ScrollAnimation> */}
           </div>
         </div>
       </section>
