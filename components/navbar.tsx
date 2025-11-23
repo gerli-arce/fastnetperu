@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
@@ -19,9 +20,11 @@ export function Navbar() {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-300">
-            <img
+            <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-gX0UoQNTTZ2ZynwEtAVfP6OUtjHVJw.png"
               alt="FASTNETPERU Logo"
+              width={48}
+              height={48}
               className="h-12 w-auto"
             />
           </Link>
@@ -49,6 +52,13 @@ export function Navbar() {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
+              href="/blog"
+              className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
+            >
+              Blog
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
               href="/cobertura"
               className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
             >
@@ -60,6 +70,13 @@ export function Navbar() {
               className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
             >
               Formas de Pago
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link
+              href="/blog"
+              className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
+            >
+              Blog
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
@@ -107,6 +124,12 @@ export function Navbar() {
               Planes
             </Link>
             <Link
+              href="/blog"
+              className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
+            >
+              Blog
+            </Link>
+            <Link
               href="/cobertura"
               className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
             >
@@ -117,6 +140,12 @@ export function Navbar() {
               className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
             >
               Formas de Pago
+            </Link>
+            <Link
+              href="/blog"
+              className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
+            >
+              Blog
             </Link>
             <Link
               href="/contacto"

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -54,7 +55,7 @@ export function ImageSlider() {
 
   return (
     <div
-      className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden shadow-2xl group"
+      className="relative w-full aspect-[2/1] min-h-[320px] sm:min-h-[380px] md:min-h-[440px] lg:min-h-[540px] overflow-hidden group bg-[#0091e6]"
       onMouseEnter={() => setIsAutoPlay(false)}
       onMouseLeave={() => setIsAutoPlay(true)}
     >
@@ -63,13 +64,19 @@ export function ImageSlider() {
         {sliderImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-all duration-700 ease-out flex items-center justify-center ${
-              index === currentSlide ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            className={`absolute inset-0 transition-all duration-500 ease-out flex items-center justify-center ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            <img src={image.src || "/placeholder.svg"} alt={image.alt} className="w-full h-full object-cover" />
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
+            <Image
+              src={image.src || "/placeholder.svg"}
+              alt={image.alt}
+              fill
+              sizes="100vw"
+              className="w-full h-full object-contain object-center"
+              priority={index === currentSlide}
+            />
+            <div className="absolute inset-0 pointer-events-none" />
           </div>
         ))}
       </div>
@@ -105,10 +112,7 @@ export function ImageSlider() {
         ))}
       </div>
 
-      {/* Auto-play indicator */}
-      <div className="absolute top-4 right-4 z-20 text-white text-sm font-medium bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm">
-        {currentSlide + 1} / {sliderImages.length}
-      </div>
+      {/* Auto-play indicator removed */}
     </div>
   )
 }

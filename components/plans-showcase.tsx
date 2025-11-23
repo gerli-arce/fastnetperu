@@ -169,7 +169,7 @@ const plansData: PlanCategory[] = [
 export function PlansShowcase() {
   const [selectedCategory, setSelectedCategory] = useState("fiber")
   const currentCategory = plansData.find((cat) => cat.id === selectedCategory)
-  const isScrollable = currentCategory?.plans.length ?? 0 > 3
+  const isScrollable = (currentCategory?.plans.length ?? 0) > 3
 
   return (
     <section className="py-20 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">

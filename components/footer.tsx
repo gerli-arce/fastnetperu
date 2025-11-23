@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 export function Footer() {
@@ -11,9 +12,11 @@ export function Footer() {
           {/* LOGO + DESCRIPCIÓN */}
           <div className="max-w-sm">
             <div className="flex items-center gap-2 mb-4">
-              <img
+              <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-gX0UoQNTTZ2ZynwEtAVfP6OUtjHVJw.png"
                 alt="FASTNETPERU Logo"
+                width={48}
+                height={48}
                 className="h-12 w-auto"
               />
             </div>

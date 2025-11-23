@@ -9,15 +9,9 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ImageSlider } from "@/components/image-slider"
 import { ScrollAnimation } from "@/components/scroll-animation"
-import { useEffect, useState } from "react"
 import { PlansShowcase } from "@/components/plans-showcase"
 
 export default function Home() {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -83,118 +77,120 @@ export default function Home() {
             </div>
           </ScrollAnimation>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <ScrollAnimation direction="left" delay={0}>
-              <Card className="border border-gray-200 hover:border-blue-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
-                    <Wifi className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-3 text-neutral-900">Internet Fibra Óptica</h3>
-                  <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
-                    Conexión de alta velocidad con tecnología FTTH para máximo rendimiento
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>Hasta 400 Mbps</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>Velocidad simétrica</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>Sin límite de datos</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
+          <div className="flex justify-center">
+            <div className="grid w-full max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <ScrollAnimation direction="left" delay={0}>
+                <Card className="border border-gray-200 hover:border-blue-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
+                      <Wifi className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-xl mb-3 text-neutral-900">Internet Fibra Óptica</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
+                      Conexión de alta velocidad con tecnología FTTH para máximo rendimiento
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>Hasta 400 Mbps</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>Velocidad simétrica</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>Sin límite de datos</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </ScrollAnimation>
 
-            <ScrollAnimation direction="up" delay={100}>
-              <Card className="border border-gray-200 hover:border-red-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
-                    <Radio className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-3 text-neutral-900">Internet Antena</h3>
-                  <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
-                    Conexión inalámbrica para zonas sin cobertura de fibra óptica
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Hasta 20 Mbps</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Cobertura amplia</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Instalación rápida</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
+              <ScrollAnimation direction="up" delay={100}>
+                <Card className="border border-gray-200 hover:border-red-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
+                      <Radio className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-xl mb-3 text-neutral-900">Internet Antena</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
+                      Conexión inalámbrica para zonas sin cobertura de fibra óptica
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Hasta 20 Mbps</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Cobertura amplia</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Instalación rápida</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </ScrollAnimation>
 
-            <ScrollAnimation direction="up" delay={200}>
-              <Card className="border border-gray-200 hover:border-blue-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
-                    <Tv className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-3 text-neutral-900">TV Cable</h3>
-                  <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
-                    Entretenimiento digital con canales HD y contenido premium
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>+100 canales HD</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>Canales deportivos</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>Contenido infantil</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
+              <ScrollAnimation direction="up" delay={200}>
+                <Card className="border border-gray-200 hover:border-blue-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
+                      <Tv className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-xl mb-3 text-neutral-900">TV Cable</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
+                      Entretenimiento digital con canales HD y contenido premium
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>+100 canales HD</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>Canales deportivos</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span>Contenido infantil</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </ScrollAnimation>
 
-            {/* <ScrollAnimation direction="right" delay={300}>
-              <Card className="border border-gray-200 hover:border-red-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
-                    <Smartphone className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-3 text-neutral-900">IPTV</h3>
-                  <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
-                    Televisión por internet con calidad 4K y contenido on-demand
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Calidad 4K</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Contenido on-demand</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                      <span>Multi-dispositivo</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollAnimation> */}
+              {/* <ScrollAnimation direction="right" delay={300}>
+                <Card className="border border-gray-200 hover:border-red-400 transition-all duration-300 card-shadow-hover group bg-white rounded-lg overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 shadow-md">
+                      <Smartphone className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-xl mb-3 text-neutral-900">IPTV</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-6 text-sm">
+                      Televisión por internet con calidad 4K y contenido on-demand
+                    </p>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Calidad 4K</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Contenido on-demand</span>
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-neutral-700">
+                        <CheckCircle2 className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <span>Multi-dispositivo</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </ScrollAnimation> */}
+            </div>
           </div>
         </div>
       </section>
