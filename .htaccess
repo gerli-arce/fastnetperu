@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# 0) No reescribir la ruta del generador de imágenes OG
+RewriteRule ^blog/og-image\.php$ - [L]
+
 # 1) Rutas /blog/<slug> SIEMPRE pasan por PHP para SEO dinámico
 RewriteRule ^blog/([^/]+)/?$ /blog/index.php?slug=$1 [L,QSA]
 

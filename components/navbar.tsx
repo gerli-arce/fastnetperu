@@ -73,13 +73,6 @@ export function Navbar() {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
-              href="/blog"
-              className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
-            >
-              Blog
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link
               href="/contacto"
               className="text-neutral-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
             >
@@ -140,12 +133,6 @@ export function Navbar() {
               className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
             >
               Formas de Pago
-            </Link>
-            <Link
-              href="/blog"
-              className="block text-neutral-700 hover:text-blue-600 hover:bg-neutral-50 py-2 px-3 rounded-lg font-medium transition-all duration-300"
-            >
-              Blog
             </Link>
             <Link
               href="/contacto"

@@ -76,8 +76,12 @@ if ($slug === '') {
 // Default metadata
 $title = 'Blog | FASTNETPERU';
 $description = 'Historias y consejos sobre conectividad.';
-$image = '/images/blog-placeholder.jpg';
-$canonical = 'https://fastnetperu.com.pe/blog';
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'fastnetperu.com.pe';
+$baseUrl = $scheme . '://' . $host;
+
+$image = $baseUrl . '/images/blog-placeholder.jpg';
+$canonical = $baseUrl . '/blog';
 $isPost = false;
 
 if ($post) {
@@ -86,8 +90,14 @@ if ($post) {
     $seoDescription = $post['seo_description'] ?? '';
     $title = $seoTitle !== '' ? $seoTitle : ($post['title'] ?: $title);
     $description = $seoDescription !== '' ? $seoDescription : ($post['excerpt'] ?: $description);
-    $image = $post['featured_image'] ?: $image;
-    $canonical = 'https://fastnetperu.com.pe/blog/' . urlencode($post['slug'] ?: $post['id']);
+
+    $slugForUrl = $post['slug'] ?: $post['id'];
+    $canonical = $baseUrl . '/blog/' . urlencode($slugForUrl);
+
+    // Use featured_image URL directly for OG (WhatsApp/Facebook friendly)
+    if (!empty($post['featured_image'])) {
+        $image = $post['featured_image'];
+    }
 }
 
 // Simple bot detection to avoid redirecting crawlers/social previews
