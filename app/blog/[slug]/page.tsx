@@ -26,11 +26,19 @@ type BlogPost = {
   content: string
   featured_image: string
   date: string
+  formattedDate: string
 }
 
 const POSTS_ENDPOINT = "https://almacenback.fastnetperu.com.pe/api/posts"
 
-const toPathSlug = (value: string | number) => `${value}`.trim().toLowerCase().replace(/\s+/g, "-")
+const toPathSlug = (value: string | number) =>
+  `${value ?? ""}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 
 const formatDate = (dateValue: string) => {
   const parsed = new Date(dateValue)
@@ -40,14 +48,17 @@ const formatDate = (dateValue: string) => {
 
 const mapApiPost = (post: ApiPost): BlogPost | null => {
   if (!post.visible || !post.status) return null
+  const dateValue = post.date_post || ""
+
   return {
     id: post.id,
-    title: post.title || "Sin titulo",
+    title: post.title || "Sin título",
     slug: post.slug || `${post.id}`,
     excerpt: post.excerpt || "",
     content: post.content || "",
     featured_image: post.featured_image || "",
-    date: formatDate(post.date_post),
+    date: dateValue,
+    formattedDate: formatDate(dateValue),
   }
 }
 
@@ -84,6 +95,26 @@ const sortByDateDesc = (posts: BlogPost[]) =>
     return db - da
   })
 
+const buildSlugCandidates = (...values: (string | number | undefined)[]) =>
+  Array.from(
+    new Set(
+      values
+        .filter((item) => item !== undefined && item !== null)
+        .map((item) => decodeURIComponent(String(item)))
+        .flatMap((item) => [item, toPathSlug(item)])
+        .map((item) => item || "")
+        .filter(Boolean),
+    ),
+  )
+
+const findPostBySlug = (posts: BlogPost[], slug: string) => {
+  const target = toPathSlug(slug)
+  return posts.find((post) => {
+    const candidates = [post.slug, toPathSlug(post.slug), toPathSlug(post.title), `${post.id}`, toPathSlug(post.id)]
+    return candidates.map(toPathSlug).includes(target)
+  })
+}
+
 const resolveSlugParam = async (params: { slug: string } | Promise<{ slug: string }>) => {
   const resolved = typeof (params as any)?.then === "function" ? await (params as Promise<{ slug: string }>) : params
   return resolved?.slug || ""
@@ -91,22 +122,29 @@ const resolveSlugParam = async (params: { slug: string } | Promise<{ slug: strin
 
 export default async function BlogDetailPage({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
   const slugParamRaw = await resolveSlugParam(params)
-  const slugDecoded = decodeURIComponent(slugParamRaw)
+  const slugDecoded = decodeURIComponent(slugParamRaw || "")
   const slugNormalized = toPathSlug(slugDecoded || slugParamRaw)
 
-  const candidates = Array.from(new Set([slugDecoded, slugNormalized].filter(Boolean)))
-
-  let current: BlogPost | null = null
-  for (const candidate of candidates) {
-    current = await fetchPostBySlug(candidate)
-    if (current) break
-  }
+  const candidates = buildSlugCandidates(slugParamRaw, slugDecoded, slugNormalized)
 
   let posts: BlogPost[] = []
   try {
     posts = await fetchPosts()
   } catch {
     posts = []
+  }
+
+  let current: BlogPost | null = findPostBySlug(posts, slugNormalized) || null
+
+  if (!current) {
+    for (const candidate of candidates) {
+      current = await fetchPostBySlug(candidate)
+      if (current) break
+    }
+  }
+
+  if (current && posts.length && !posts.some((post) => post.id === current!.id)) {
+    posts = [current, ...posts]
   }
 
   if (!current) {
@@ -159,7 +197,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                 Blog
               </span>
               <span className="h-[1px] w-12 bg-gradient-to-r from-white/50 to-transparent" />
-              <span className="text-blue-100/90 font-semibold">{current.date}</span>
+              <span className="text-blue-100/90 font-semibold">{current.formattedDate}</span>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance text-white drop-shadow-2xl [text-shadow:_0_2px_20px_rgb(59_130_246_/_0.5)]">
@@ -179,8 +217,8 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                 <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-1.5 text-[11px] font-bold text-white shadow-md shadow-blue-500/30 uppercase tracking-wider">
                   Publicado
                 </span>
-                <span className="text-slate-400">•</span>
-                <span className="text-sm font-semibold text-slate-600">{current.date}</span>
+                <span className="text-slate-400">&bull;</span>
+                <span className="text-sm font-semibold text-slate-600">{current.formattedDate}</span>
               </div>
 
               <div
@@ -208,7 +246,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/60 border border-slate-100 hover:bg-blue-50/50 hover:border-blue-200 transition-all duration-300">
                   <span className="text-sm font-medium text-slate-500">Fecha</span>
-                  <span className="font-bold text-slate-900">{current.date}</span>
+                  <span className="font-bold text-slate-900">{current.formattedDate}</span>
                 </div>
               </div>
 
@@ -265,7 +303,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
                 <div className="p-6 flex-1 flex flex-col gap-3">
                   <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-slate-500 font-bold">
-                    {post.date}
+                    {post.formattedDate}
                   </span>
                   <h3 className="text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
                     {post.title}
@@ -296,39 +334,42 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const slugRaw = await resolveSlugParam(params)
-  const slugDecoded = decodeURIComponent(slugRaw)
+  const slugDecoded = decodeURIComponent(slugRaw || "")
   const slugNormalized = toPathSlug(slugDecoded || slugRaw)
-  const candidates = Array.from(new Set([slugDecoded, slugNormalized].filter(Boolean)))
+  const candidates = buildSlugCandidates(slugRaw, slugDecoded, slugNormalized)
 
-  for (const candidate of candidates) {
-    try {
-      const current = await fetchPostBySlug(candidate)
-      if (current) {
-        const title = current.title || "Blog | FASTNETPERU"
-        const description = current.excerpt || "Historias y consejos sobre conectividad."
-        const image = current.featured_image || "/images/blog-placeholder.jpg"
-        const url = `https://fastnetperu.com.pe/blog/${encodeURIComponent(toPathSlug(current.slug || current.id))}`
+  const posts = await fetchPosts().catch(() => [])
+  let current = findPostBySlug(posts, slugNormalized) || null
 
-        return {
-          title,
-          description,
-          openGraph: {
-            title,
-            description,
-            url,
-            type: "article",
-            images: [{ url: image }],
-          },
-          twitter: {
-            card: "summary_large_image",
-            title,
-            description,
-            images: [image],
-          },
-        }
-      }
-    } catch {
-      // ignore and try next candidate
+  if (!current) {
+    for (const candidate of candidates) {
+      current = await fetchPostBySlug(candidate)
+      if (current) break
+    }
+  }
+
+  if (current) {
+    const title = current.title || "Blog | FASTNETPERU"
+    const description = current.excerpt || "Historias y consejos sobre conectividad."
+    const image = current.featured_image || "/images/blog-placeholder.jpg"
+    const url = `https://fastnetperu.com.pe/blog/${encodeURIComponent(toPathSlug(current.slug || current.id))}`
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url,
+        type: "article",
+        images: [{ url: image }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [image],
+      },
     }
   }
 

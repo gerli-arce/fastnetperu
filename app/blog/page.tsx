@@ -2,8 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight, Calendar, User } from "lucide-react"
-import { useEffect, useState } from "react"
+import Head from "next/head"
+import { ArrowUpRight, Calendar, Share2, User } from "lucide-react"
+import { Suspense, useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { HeaderTopBar } from "@/components/header-top-bar"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -29,10 +31,20 @@ type BlogPost = {
   featured_image: string
   tag: string
   date: string
+  dateRaw: string
   author: string
 }
 
-const toPathSlug = (value: string | number) => `${value}`.trim().toLowerCase().replace(/\s+/g, "-")
+const POSTS_ENDPOINT = "https://almacenback.fastnetperu.com.pe/api/posts"
+
+const toPathSlug = (value: string | number) =>
+  `${value ?? ""}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 
 const formatDate = (dateValue: string) => {
   const parsed = new Date(dateValue)
@@ -40,32 +52,70 @@ const formatDate = (dateValue: string) => {
   return parsed.toLocaleDateString("es-PE", { day: "2-digit", month: "long", year: "numeric" })
 }
 
+const mapApiPost = (post: ApiPost): BlogPost | null => {
+  if (!post.visible || !post.status) return null
+  const dateRaw = post.date_post || ""
+  return {
+    id: post.id,
+    title: post.title || "Sin título",
+    slug: post.slug || "",
+    excerpt: post.excerpt || "",
+    content: post.content || "",
+    featured_image: post.featured_image || "",
+    tag: "Blog",
+    date: formatDate(dateRaw),
+    dateRaw,
+    author: "FASTNETPERU",
+  }
+}
+
 const mapApiPosts = (items: ApiPost[]): BlogPost[] =>
   items
-    .filter((post) => post.visible && post.status)
-    .map((post) => ({
-      id: post.id,
-      title: post.title || "Sin título",
-      slug: post.slug || "",
-      excerpt: post.excerpt || "",
-      content: post.content || "",
-      featured_image: post.featured_image || "",
-      tag: "Blog",
-      date: formatDate(post.date_post),
-      author: "FASTNETPERU",
-    }))
+    .map((post) => mapApiPost(post))
+    .filter((post): post is BlogPost => post !== null)
 
-export default function BlogPage() {
+const findPostBySlug = (posts: BlogPost[], slug: string) => {
+  const target = toPathSlug(slug)
+  return posts.find((post) => {
+    const candidates = [post.slug, toPathSlug(post.slug), toPathSlug(post.title), `${post.id}`]
+    return candidates.map(toPathSlug).includes(target)
+  })
+}
+
+const fetchPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  if (!slug) return null
+  const res = await fetch(`${POSTS_ENDPOINT}/slug?slug=${encodeURIComponent(slug)}`, { cache: "no-store" })
+  if (!res.ok) return null
+  const json = await res.json()
+  const data: ApiPost | undefined = json?.data
+  if (!data) return null
+  return mapApiPost(data)
+}
+
+function BlogPageContent() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null)
+  const [selectedLoading, setSelectedLoading] = useState(false)
+  const [selectedError, setSelectedError] = useState<string | null>(null)
+  const [copiedSeoLink, setCopiedSeoLink] = useState(false)
+
+  const searchParams = useSearchParams()
+  const slugParamRaw = searchParams?.get("slug") || ""
+  const slugNormalized = useMemo(() => toPathSlug(slugParamRaw), [slugParamRaw])
+  const baseUrl = "https://fastnetperu.com.pe"
+
+  const selectedSeoUrl = useMemo(() => {
+    if (!selectedPost) return `${baseUrl}/blog`
+    const canonicalSlug = toPathSlug(selectedPost.slug || selectedPost.id)
+    return `${baseUrl}/blog/${encodeURIComponent(canonicalSlug)}`
+  }, [baseUrl, selectedPost])
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("https://almacenback.fastnetperu.com.pe/api/posts", {
-          cache: "no-store",
-        })
+        const response = await fetch(POSTS_ENDPOINT, { cache: "no-store" })
         if (!response.ok) throw new Error("Error al obtener posts")
         const json = await response.json()
         const data: ApiPost[] = Array.isArray(json?.data) ? json.data : []
@@ -79,8 +129,97 @@ export default function BlogPage() {
     fetchPosts()
   }, [])
 
+  useEffect(() => {
+    if (!slugParamRaw) {
+      setSelectedPost(null)
+      setSelectedError(null)
+      setSelectedLoading(false)
+      return
+    }
+
+    const fromList = findPostBySlug(posts, slugNormalized)
+    if (fromList) {
+      setSelectedPost(fromList)
+      setSelectedError(null)
+      setSelectedLoading(false)
+      return
+    }
+
+    let cancelled = false
+    const load = async () => {
+      setSelectedLoading(true)
+      setSelectedError(null)
+      try {
+        const fetched = await fetchPostBySlug(slugNormalized)
+        if (cancelled) return
+        if (fetched) {
+          setSelectedPost(fetched)
+          setSelectedError(null)
+        } else {
+          setSelectedPost(null)
+          setSelectedError("No se encontró el post solicitado, mostrando el listado.")
+        }
+      } catch {
+        if (!cancelled) {
+          setSelectedPost(null)
+          setSelectedError("No se pudo cargar el post solicitado, mostrando el listado.")
+        }
+      } finally {
+        if (!cancelled) setSelectedLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [posts, slugNormalized, slugParamRaw])
+
+  const handleCopySeoUrl = async () => {
+    if (!selectedPost) return
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(selectedSeoUrl)
+      } else {
+        const dummy = document.createElement("textarea")
+        dummy.value = selectedSeoUrl
+        document.body.appendChild(dummy)
+        dummy.select()
+        document.execCommand("copy")
+        document.body.removeChild(dummy)
+      }
+      setCopiedSeoLink(true)
+      setTimeout(() => setCopiedSeoLink(false), 2000)
+    } catch {
+      // ignore copy errors
+    }
+  }
+
+  const metaTitle = selectedPost ? selectedPost.title : "Blog | FASTNETPERU"
+  const metaDescription =
+    selectedPost?.excerpt ||
+    "Historias y consejos sobre conectividad para fibra, antenas y zonas rurales/urbanas de FASTNETPERU."
+  const metaImage = selectedPost?.featured_image || "/images/blog-placeholder.jpg"
+  const canonical = selectedPost
+    ? `${baseUrl}/blog/${encodeURIComponent(toPathSlug(selectedPost.slug || selectedPost.id))}`
+    : `${baseUrl}/blog`
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
+      <Head>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content={selectedPost ? "article" : "website"} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={metaImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={metaImage} />
+      </Head>
+
       <HeaderTopBar />
       <Navbar />
 
@@ -137,8 +276,86 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+      <main className="container mx-auto px-4 py-6 space-y-8 max-w-7xl">
+        {slugParamRaw && (
+          <section className="rounded-3xl border border-blue-100 bg-white shadow-lg shadow-blue-100/50 p-6 md:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">Detalle solicitado</p>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900">
+                  {slugParamRaw} {!selectedLoading && selectedPost ? "" : "(buscando...)"}
+                </h2>
+              </div>
+              <div className="flex items-center gap-3">
+                {selectedPost && (
+                  <button
+                    type="button"
+                    onClick={handleCopySeoUrl}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>{copiedSeoLink ? "Link SEO copiado" : "Copiar link SEO"}</span>
+                  </button>
+                )}
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                >
+                  Limpiar filtro
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {selectedLoading && (
+              <div className="flex items-center gap-3 text-slate-600">
+                <div className="inline-block w-8 h-8 border-[3px] border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <span>Cargando post...</span>
+              </div>
+            )}
+
+            {selectedError && (
+              <div className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-sm font-medium">
+                {selectedError}
+              </div>
+            )}
+
+            {selectedPost && (
+              <div className="mt-6 grid md:grid-cols-5 gap-6">
+                <div className="relative md:col-span-2 h-56 md:h-full rounded-2xl overflow-hidden shadow-lg bg-slate-100">
+                  <Image
+                    src={selectedPost.featured_image || "/images/blog-placeholder.jpg"}
+                    alt={selectedPost.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 40vw"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="md:col-span-3 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 font-semibold text-blue-700">
+                      <Calendar className="w-4 h-4" />
+                      {selectedPost.date}
+                    </span>
+                    <span className="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 font-semibold text-indigo-700">
+                      <User className="w-4 h-4" />
+                      {selectedPost.author}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 leading-tight">{selectedPost.title}</h3>
+                  <p className="text-slate-600 leading-relaxed text-pretty">{selectedPost.excerpt}</p>
+                  <div
+                    className="prose prose-sm md:prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                  />
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {loading && (
             <div className="col-span-full text-center py-20">
               <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -208,7 +425,7 @@ export default function BlogPage() {
 
                 <div className="pt-5 border-t border-slate-200/50">
                   <Link
-                    href={`/blog/${encodeURIComponent(toPathSlug(post.slug || post.id))}`}
+                    href={`/blog/?slug=${encodeURIComponent(toPathSlug(post.slug || post.id))}`}
                     className="group/link relative inline-flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-wide transition-all hover:gap-4 hover:text-indigo-600"
                   >
                     <span className="relative">
@@ -226,5 +443,19 @@ export default function BlogPage() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-white">
+          <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <BlogPageContent />
+    </Suspense>
   )
 }

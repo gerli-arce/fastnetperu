@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# 1) Rutas /blog/<slug> SIEMPRE pasan por PHP para SEO dinámico
+RewriteRule ^blog/([^/]+)/?$ /blog/index.php?slug=$1 [L,QSA]
+
+# 2) El resto del sitio sirve archivos/directorios estáticos
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 3) Priorizar index.html sobre index.php en directorios
+DirectoryIndex index.html index.php
